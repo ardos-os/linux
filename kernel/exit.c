@@ -962,6 +962,10 @@ void __noreturn do_exit(long code)
 		if (unlikely(is_global_init(tsk)))
 			panic("Attempted to kill init! exitcode=0x%08x\n",
 				tsk->signal->group_exit_code ?: (int)code);
+		else if (unlikely(tsk->signal->flags & SIGNAL_CRITICAL))
+			panic("Critical process %s[%d] died (exitcode=0x%08x)\n",
+				tsk->comm, task_tgid_nr(tsk),
+				tsk->signal->group_exit_code ?: (int)code);
 
 #ifdef CONFIG_POSIX_TIMERS
 		hrtimer_cancel(&tsk->signal->real_timer);

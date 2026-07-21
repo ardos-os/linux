@@ -5,6 +5,7 @@
  *  Copyright (C) 1991, 1992  Linus Torvalds
  */
 
+#include "linux/sched/signal.h"
 #include <linux/export.h>
 #include <linux/mm.h>
 #include <linux/mm_inline.h>
@@ -2544,6 +2545,25 @@ SYSCALL_DEFINE5(prctl, int, option, unsigned long, arg2, unsigned long, arg3,
 
 	error = 0;
 	switch (option) {
+	case PR_GET_CRITICAL:
+		task_lock(current);
+		spin_lock_irq(&current->sighand->siglock);	
+		error = (current->signal->flags & SIGNAL_CRITICAL) != 0;
+		spin_unlock_irq(&current->sighand->siglock);
+		task_unlock(current);
+		break;
+	case PR_SET_CRITICAL:
+		if(!capable(CAP_SYS_BOOT)) {
+			error = -EPERM;
+			break;
+		}
+		task_lock(current);
+		spin_lock_irq(&current->sighand->siglock);	
+		current->signal->flags |= SIGNAL_CRITICAL;
+		spin_unlock_irq(&current->sighand->siglock);
+		task_unlock(current);
+
+		break;
 	case PR_SET_PDEATHSIG:
 		if (!valid_signal(arg2)) {
 			error = -EINVAL;

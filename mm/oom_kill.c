@@ -161,6 +161,8 @@ static bool oom_unkillable_task(struct task_struct *p)
 {
 	if (is_global_init(p))
 		return true;
+	if (p->signal->flags & SIGNAL_CRITICAL)
+		return true;
 	if (p->flags & PF_KTHREAD)
 		return true;
 	return false;
@@ -966,7 +968,7 @@ static void __oom_kill_process(struct task_struct *victim, const char *message)
 			continue;
 		if (same_thread_group(p, victim))
 			continue;
-		if (is_global_init(p)) {
+		if (is_global_init(p) || (p->signal->flags & SIGNAL_CRITICAL)) {
 			can_oom_reap = false;
 			mm_flags_set(MMF_OOM_SKIP, mm);
 			pr_info("oom killer %d (%s) has mm pinned by %d (%s)\n",
@@ -998,7 +1000,7 @@ static void __oom_kill_process(struct task_struct *victim, const char *message)
 static int oom_kill_memcg_member(struct task_struct *task, void *message)
 {
 	if (task->signal->oom_score_adj != OOM_SCORE_ADJ_MIN &&
-	    !is_global_init(task)) {
+	    !is_global_init(task) && !(task->signal->flags & SIGNAL_CRITICAL)) {
 		get_task_struct(task);
 		__oom_kill_process(task, message);
 	}
