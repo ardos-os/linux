@@ -5,7 +5,6 @@
 #include <linux/sysfb.h>
 #include <linux/io.h>
 #include <linux/screen_info.h>
-#define private static
 #define Fn(r, name, args...) r (*name)(args);
 #define Renderer_self struct Renderer *self
 #define Renderer_takeself struct Renderer self
@@ -53,7 +52,7 @@ struct CreateRendererResult {
 		enum CreateRendererResultError error;
 	} inner;
 };
-private struct CreateRendererResult CreateRendererResult__Err(enum CreateRendererResultError error) {
+static inline struct CreateRendererResult CreateRendererResult__Err(enum CreateRendererResultError error) {
 	return (struct CreateRendererResult) {
 		.ok = false,
 		.inner = {
@@ -61,7 +60,7 @@ private struct CreateRendererResult CreateRendererResult__Err(enum CreateRendere
 		}
 	};
 }
-private struct CreateRendererResult Renderer__from_sysfb(struct sysfb_display_info* display_info) {
+static __init struct CreateRendererResult Renderer__from_sysfb(struct sysfb_display_info* display_info) {
 	if(!display_info) return CreateRendererResult__Err(CreateRendererResultError__NoScreen);
 	struct screen_info* si = &display_info->screen;
 
@@ -94,18 +93,18 @@ private struct CreateRendererResult Renderer__from_sysfb(struct sysfb_display_in
 	};
 }
 
-private struct CreateRendererResult Renderer__from_primary_display(void) {
+static inline struct CreateRendererResult Renderer__from_primary_display(void) {
 	return Renderer__from_sysfb(&sysfb_primary_display);
 }
 
-private inline u32 Renderer__pack_pixel(Renderer_self, u8 red, u8 green, u8 blue)
+static inline u32 Renderer__pack_pixel(Renderer_self, u8 red, u8 green, u8 blue)
 {
     return ((u32)red   << self->pixel_color_positions.red_pos)   |
            ((u32)green << self->pixel_color_positions.green_pos) |
            ((u32)blue  << self->pixel_color_positions.blue_pos);
 }
 
-private inline void* Renderer__pointer_to_pixel(Renderer_self, u32 x, u32 y) {
+static inline void* Renderer__pointer_to_pixel(Renderer_self, u32 x, u32 y) {
 	u64 scanline_size = self->scanline_stride;
 	u64 y_offset = scanline_size * y;
 	u64 x_offset = (x*self->bits_per_pixel)/8;
@@ -118,7 +117,7 @@ enum RendererSetPixelError {
 	RendererSetPixelError__UnknownFormat
 };
 
-private inline enum RendererSetPixelError Renderer__set_pixel(Renderer_self, u32 color, u32 x, u32 y) {
+static inline enum RendererSetPixelError Renderer__set_pixel(Renderer_self, u32 color, u32 x, u32 y) {
 	if(self->bits_per_pixel != 32) return RendererSetPixelError__UnknownFormat;
 	if(self->depth != 32 && self->depth != 24) return RendererSetPixelError__UnknownFormat;
 	volatile u32* pixel_pointer = Renderer__pointer_to_pixel(self, x, y);
@@ -126,7 +125,7 @@ private inline enum RendererSetPixelError Renderer__set_pixel(Renderer_self, u32
 	return RendererSetPixelError__NoError;
 }
 /// Drops the renderer, taking ownership of self
-private void Renderer__drop(Renderer_takeself) {
+static __init void Renderer__drop(Renderer_takeself) {
 	self.free_fb(self.fb_pointer);
 }
 
