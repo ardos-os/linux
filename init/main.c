@@ -107,6 +107,7 @@
 #include <linux/time_namespace.h>
 #include <linux/unaligned.h>
 #include <linux/vdso_datastore.h>
+#include <linux/early_fb_logo.h>
 #include <net/net_namespace.h>
 
 #include <asm/io.h>
@@ -1032,6 +1033,10 @@ void start_kernel(void)
 	sort_main_extable();
 	trap_init();
 	mm_core_init();
+
+#ifdef CONFIG_EARLY_BOOT_LOGO
+	draw_early_boot_logo();
+#endif
 	maple_tree_init();
 	poking_init();
 	ftrace_init();

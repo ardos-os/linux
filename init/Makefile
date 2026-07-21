@@ -14,6 +14,8 @@ endif
 obj-$(CONFIG_GENERIC_CALIBRATE_DELAY) += calibrate.o
 obj-$(CONFIG_INITRAMFS_TEST)   += initramfs_test.o
 
+obj-$(CONFIG_EARLY_BOOT_LOGO)	+= earlylogo.o
+
 obj-y                          += init_task.o
 
 mounts-y			:= do_mounts.o
@@ -60,3 +62,14 @@ include/generated/utsversion.h: FORCE
 
 $(obj)/version-timestamp.o: include/generated/utsversion.h
 CFLAGS_version-timestamp.o := -include include/generated/utsversion.h
+
+# Early boot logo
+quiet_cmd_convlogo = CONVLOGO $@
+      cmd_convlogo = $(objtree)/scripts/earlylogo/convlogo -o $@ $<
+
+$(obj)/../include/generated/early-logo.h: $(CONFIG_EARLY_BOOT_LOGO_FILE) FORCE
+	$(call if_changed,convlogo)
+
+$(obj)/earlylogo.o: $(obj)/../include/generated/early-logo.h
+
+always-$(CONFIG_EARLY_BOOT_LOGO) += ../include/generated/early-logo.h
