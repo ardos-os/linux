@@ -214,32 +214,6 @@ config SYSFB_SIMPLEFB
 
 	  If unsure, say Y.
 
-config EARLY_BOOT_LOGO
-	bool "Early boot logo on system framebuffer"
-	depends on SYSFB
-	help
-	  Draw a centered BMP logo to the system framebuffer (EFI GOP,
-	  VESA, or other screen_info-backed LFB) immediately after
-	  setup_arch(), before any userspace DRM bootsplash or fbdev
-	  driver runs. The logo persists in framebuffer memory until
-	  the userspace DRM client overdraws it via a simpledrm/efidrm
-	  atomic commit, providing a clean handoff similar to the
-	  Windows/Mac boot screen experience.
-
-config EARLY_BOOT_LOGO_FILE
-	string "Early boot logo .bmp file"
-	depends on EARLY_BOOT_LOGO
-	default ""
-	help
-	  Path to a 24-bit or 32-bit uncompressed BMP image, relative to
-	  the kernel source tree root. This image is converted at build
-	  time into a C header (include/generated/early-logo.h) containing
-	  an RGB888 byte array, and drawn centered to the framebuffer
-	  at boot.
-
-	  Example with ImageMagick:
-	    magick source.png -compress none destination.bmp
-
 config TH1520_AON_PROTOCOL
 	tristate "Always-On firmware protocol"
 	depends on ARCH_THEAD || COMPILE_TEST
