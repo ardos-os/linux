@@ -2547,7 +2547,7 @@ SYSCALL_DEFINE5(prctl, int, option, unsigned long, arg2, unsigned long, arg3,
 	switch (option) {
 	case PR_GET_CRITICAL:
 		task_lock(current);
-		spin_lock_irq(&current->sighand->siglock);	
+		spin_lock_irq(&current->sighand->siglock);
 		error = (current->signal->flags & SIGNAL_CRITICAL) != 0;
 		spin_unlock_irq(&current->sighand->siglock);
 		task_unlock(current);
@@ -2558,11 +2558,19 @@ SYSCALL_DEFINE5(prctl, int, option, unsigned long, arg2, unsigned long, arg3,
 			break;
 		}
 		task_lock(current);
-		spin_lock_irq(&current->sighand->siglock);	
+		spin_lock_irq(&current->sighand->siglock);
 		current->signal->flags |= SIGNAL_CRITICAL;
 		spin_unlock_irq(&current->sighand->siglock);
 		task_unlock(current);
 
+		break;
+	case PR_CLEAR_CRITICAL:
+		task_lock(current);
+		spin_lock_irq(&current->sighand->siglock);
+		if (current->signal->flags & SIGNAL_CRITICAL)
+		current->signal->flags ^= SIGNAL_CRITICAL;
+		spin_unlock_irq(&current->sighand->siglock);
+		task_unlock(current);
 		break;
 	case PR_SET_PDEATHSIG:
 		if (!valid_signal(arg2)) {

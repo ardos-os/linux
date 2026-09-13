@@ -417,4 +417,5 @@ struct prctl_mm_map {
 # define PR_CFI_LOCK		_BITUL(2)
 #define PR_SET_CRITICAL    0x5a5a
 #define PR_GET_CRITICAL    0x5a5b
+#define PR_CLEAR_CRITICAL    0x5a5c
 #endif /* _LINUX_PRCTL_H */
