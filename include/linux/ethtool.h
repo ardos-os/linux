@@ -562,6 +562,7 @@ struct ethtool_fec_hist {
 		u64 per_lane[ETHTOOL_MAX_LANES];
 	} values[ETHTOOL_FEC_HIST_MAX];
 	const struct ethtool_fec_hist_range *ranges;
+	struct ethtool_fec_hist_range ranges_buf[ETHTOOL_FEC_HIST_MAX];
 };
 /**
  * struct ethtool_fec_stats - statistics for IEEE 802.3 FEC
@@ -1056,6 +1057,12 @@ struct kernel_ethtool_ts_info {
  * @get_sset_count: Get number of strings that @get_strings will write.
  * @get_rxnfc: Get RX flow classification rules.  Returns a negative
  *	error code or zero.
+ *	Note that for %ETHTOOL_GRXCLSRLALL rule_cnt and size of the arrays
+ *	is user-provided, and not guaranteed to match what driver would
+ *	have reported via %ETHTOOL_GRXCLSRLCNT. Drivers must return -%EMSGSIZE
+ *	when rule_cnt is too small. rule_locs is %NULL when rule_cnt is zero.
+ *	On success drivers must set rule_cnt to the number of locations they
+ *	filled in, the core copies out exactly that many.
  * @set_rxnfc: Set RX flow classification rules.  Returns a negative
  *	error code or zero.
  * @flash_device: Write a firmware image to device's flash memory.
